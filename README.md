@@ -8,19 +8,19 @@ NOTE: This collection is community driven and not maintained by the Trustfall ma
 
 A OpenAPI Trustfall adapter for the v3.0.x spec.
 
-More details can be found here [here](openapi-trustfall-adapter/README.md)
+More details can be found [here](openapi-trustfall-adapter/README.md)
 
 ## Terraform Trustfall Adapter
 
 A Terraform Trustfall adapter for.
 
-More details can be found here [here](terraform-trustfall-adapter/README.md)
+More details can be found [here](terraform-trustfall-adapter/README.md)
 
 ## Filesystem Trustfall Adapter
 
 A Terraform Trustfall adapter for.
 
-More details can be found here [here](filesystem-trustfall-adapter/README.md)
+More details can be found [here](filesystem-trustfall-adapter/README.md)
 
 ## TODO
 
