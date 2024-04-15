@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
 #[derive(Debug, Default, Clone)]
-pub struct HCL {
+pub struct HclData {
     pub modules: Vec<Module>,
     pub terraform: Vec<Terraform>,
     pub api_config: Option<ApiConfig>,

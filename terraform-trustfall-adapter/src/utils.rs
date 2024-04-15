@@ -4,23 +4,23 @@ use std::{
 };
 
 use super::model::{
-    ApiConfig, Backend, Lambda, Module, RequiredProvider, TemplateVariable, Terraform, Variable,
-    HCL,
+    ApiConfig, Backend, HclData, Lambda, Module, RequiredProvider, TemplateVariable, Terraform,
+    Variable,
 };
 
-pub fn extract_data_from_hcl(path: &Path) -> HCL {
+pub fn extract_data_from_hcl(path: &Path) -> HclData {
     let files = find_files_ignore_dir(path.to_path_buf(), "tf", ".terraform");
     extract_data_from_files(&files)
 }
 
-pub fn extract_data_from_files(files: &Vec<PathBuf>) -> HCL {
+pub fn extract_data_from_files(files: &Vec<PathBuf>) -> HclData {
     let mut json = Vec::new();
     for file in files {
-        let contents = std::fs::read_to_string(&file).unwrap();
+        let contents = std::fs::read_to_string(file).unwrap();
         let value: serde_json::Value = hcl::from_str(&contents).unwrap();
         json.push(value);
     }
-    let mut hcl = HCL::default();
+    let mut hcl = HclData::default();
     hcl.modules = extract_modules(&json);
     hcl.terraform = extract_terraform(&json);
     hcl.lambda = extract_lambda(&json);
@@ -31,33 +31,35 @@ pub fn extract_data_from_files(files: &Vec<PathBuf>) -> HCL {
 fn extract_modules(json: &Vec<serde_json::Value>) -> Vec<Module> {
     let mut modules = Vec::new();
     for value in json {
-        value.get("module").map(|x| match x {
-            serde_json::Value::Object(s) => modules.extend(s.iter().map(|record| {
-                Module {
-                    name: record.0.to_string(),
-                    source: record
-                        .1
-                        .get("source")
-                        .expect("Source should be set")
-                        .to_string(),
-                    version: record
-                        .1
-                        .get("version")
-                        .unwrap_or_else(|| panic!("Version should be set: {}", record.0))
-                        .to_string(),
-                    variables: value
-                        .as_object()
-                        .unwrap()
-                        .iter()
-                        .map(|(k, v)| Variable {
-                            name: k.to_string(),
-                            value: v.to_string(),
-                        })
-                        .collect(),
-                }
-            })),
-            _ => todo!(),
-        });
+        if let Some(x) = value.get("module") {
+            match x {
+                serde_json::Value::Object(s) => modules.extend(s.iter().map(|record| {
+                    Module {
+                        name: record.0.to_string(),
+                        source: record
+                            .1
+                            .get("source")
+                            .expect("Source should be set")
+                            .to_string(),
+                        version: record
+                            .1
+                            .get("version")
+                            .unwrap_or_else(|| panic!("Version should be set: {}", record.0))
+                            .to_string(),
+                        variables: value
+                            .as_object()
+                            .unwrap()
+                            .iter()
+                            .map(|(k, v)| Variable {
+                                name: k.to_string(),
+                                value: v.to_string(),
+                            })
+                            .collect(),
+                    }
+                })),
+                _ => todo!(),
+            }
+        }
     }
     modules
 }
@@ -65,50 +67,52 @@ fn extract_modules(json: &Vec<serde_json::Value>) -> Vec<Module> {
 fn extract_terraform(json: &Vec<serde_json::Value>) -> Vec<Terraform> {
     let mut terraform = Vec::new();
     for value in json {
-        value.get("terraform").map(|x| match x {
-            serde_json::Value::Object(s) => {
-                let required_version = s.get("required_version").map(|x| x.to_string());
-                let backend: Option<Vec<Backend>> = s.get("backend").map(|x| match x {
-                    serde_json::Value::Object(s) => s
-                        .iter()
-                        .map(|(k, _v)| Backend {
-                            name: k.to_string(),
-                        })
-                        .collect(),
-                    _ => unreachable!(),
-                });
-                let required_providers: Option<Vec<RequiredProvider>> =
-                    s.get("required_providers").map(|x| match x {
+        if let Some(x) = value.get("terraform") {
+            match x {
+                serde_json::Value::Object(s) => {
+                    let required_version = s.get("required_version").map(|x| x.to_string());
+                    let backend: Option<Vec<Backend>> = s.get("backend").map(|x| match x {
                         serde_json::Value::Object(s) => s
                             .iter()
-                            .map(|(k, v)| RequiredProvider {
+                            .map(|(k, _v)| Backend {
                                 name: k.to_string(),
-                                source: v.get("source").unwrap().to_string(),
-                                version: v.get("version").unwrap().to_string(),
                             })
                             .collect(),
                         _ => unreachable!(),
                     });
+                    let required_providers: Option<Vec<RequiredProvider>> =
+                        s.get("required_providers").map(|x| match x {
+                            serde_json::Value::Object(s) => s
+                                .iter()
+                                .map(|(k, v)| RequiredProvider {
+                                    name: k.to_string(),
+                                    source: v.get("source").unwrap().to_string(),
+                                    version: v.get("version").unwrap().to_string(),
+                                })
+                                .collect(),
+                            _ => unreachable!(),
+                        });
 
-                let backend = if let Some(backend) = backend {
-                    if backend.is_empty() {
-                        None
-                    } else if backend.len() > 1 {
-                        panic!("backend can only have one value");
+                    let backend = if let Some(backend) = backend {
+                        if backend.is_empty() {
+                            None
+                        } else if backend.len() > 1 {
+                            panic!("backend can only have one value");
+                        } else {
+                            Some(backend[0].clone())
+                        }
                     } else {
-                        Some(backend[0].clone())
-                    }
-                } else {
-                    None
-                };
-                terraform.push(Terraform {
-                    required_version,
-                    backend,
-                    required_providers: required_providers.unwrap_or_default(),
-                })
+                        None
+                    };
+                    terraform.push(Terraform {
+                        required_version,
+                        backend,
+                        required_providers: required_providers.unwrap_or_default(),
+                    })
+                }
+                _ => todo!(),
             }
-            _ => todo!(),
-        });
+        }
     }
     terraform
 }
@@ -168,7 +172,7 @@ fn extract_lambda(json: &Vec<serde_json::Value>) -> Vec<Lambda> {
     lambdas
 }
 
-fn extract_api_config(json: &Vec<serde_json::Value>, lambdas: Vec<Lambda>) -> Option<ApiConfig> {
+fn extract_api_config(json: &[serde_json::Value], lambdas: Vec<Lambda>) -> Option<ApiConfig> {
     let s = json.iter().find_map(|x| {
         x.get("module")
             .and_then(|service| service.get("service_api"))
@@ -270,15 +274,16 @@ fn extract_api_and_method(line: &str, method: HttpMethod) -> Option<(String, Str
 
 pub fn find_files_ignore_dir(path: PathBuf, extension: &str, folder: &str) -> Vec<PathBuf> {
     let mut files = Vec::new();
-    for entries in path.read_dir().expect("Failed to get dir contents") {
-        if let Ok(entry) = entries {
-            if entry.path().is_dir() && !entry.path().ends_with(folder) {
-                files.extend(find_files_ignore_dir(entry.path(), extension, folder));
-            } else if entry.path().is_file()
-                && entry.path().extension() == Some(OsStr::new(extension))
-            {
-                files.push(entry.path().clone());
-            }
+    for entry in path
+        .read_dir()
+        .expect("Failed to get dir contents")
+        .flatten()
+    {
+        if entry.path().is_dir() && !entry.path().ends_with(folder) {
+            files.extend(find_files_ignore_dir(entry.path(), extension, folder));
+        } else if entry.path().is_file() && entry.path().extension() == Some(OsStr::new(extension))
+        {
+            files.push(entry.path().clone());
         }
     }
     files

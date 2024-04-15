@@ -86,21 +86,16 @@ impl OpenApiAdapter {
     }
 
     fn paths<'a>(&self) -> VertexIterator<'a, Vertex> {
-        let iter = self.openapi.paths.clone().into_iter().filter_map(|x| {
+        let iter = self.openapi.paths.clone().into_iter().map(|x| {
             let mut route: Route = x.1.into();
             route.path = x.0.clone().to_string();
-            Some(Vertex::Path(route))
+            Vertex::Path(route)
         });
         Box::new(iter)
     }
 
     fn tags<'a>(&self) -> VertexIterator<'a, Vertex> {
-        let iter = self
-            .openapi
-            .tags
-            .clone()
-            .into_iter()
-            .filter_map(|x| Some(Vertex::Tag(x)));
+        let iter = self.openapi.tags.clone().into_iter().map(Vertex::Tag);
         Box::new(iter)
         // Vertex::Tags(self.openapi.tags.clone())
     }

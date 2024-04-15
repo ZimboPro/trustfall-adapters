@@ -15,7 +15,7 @@ use trustfall::{
 use crate::utils::extract_data_from_files;
 
 use super::{
-    model::{Module, HCL},
+    model::{HclData, Module},
     utils::extract_data_from_hcl,
     vertex::Vertex,
 };
@@ -25,7 +25,7 @@ static SCHEMA: OnceLock<Schema> = OnceLock::new();
 #[non_exhaustive]
 #[derive(Debug, Default)]
 pub struct HclAdapter {
-    data: HCL,
+    data: HclData,
 }
 
 impl HclAdapter {
