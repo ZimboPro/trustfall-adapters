@@ -2,9 +2,17 @@ name: CI
 
 on:
   pull_request:
+    paths:
+      - "**/Cargo.toml"
+      - "**/Cargo.lock"
+      - "**/*.rs"
   push:
     branches:
       - master
+    paths:
+      - "**/Cargo.toml"
+      - "**/Cargo.lock"
+      - "**/*.rs"
 
 jobs:
   style:
