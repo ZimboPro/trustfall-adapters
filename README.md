@@ -21,3 +21,12 @@ More details can be found here [here](terraform-trustfall-adapter/README.md)
 A Terraform Trustfall adapter for.
 
 More details can be found here [here](filesystem-trustfall-adapter/README.md)
+
+## TODO
+
+- [ ] Github Actions
+    - [ ] cargo-semver-checks
+    - [ ] PR checks
+    - [ ] Issue template
+    - [ ] release checks
+    - [ ] auto release

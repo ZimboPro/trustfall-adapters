@@ -5,6 +5,8 @@
         "openapi",
         "openapiv",
         "passthrough",
+        "replacen",
+        "splitn",
         "Trustfall"
     ]
 }

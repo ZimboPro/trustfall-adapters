@@ -1,6 +1,8 @@
 # Filesystem Trustfall Adapter
 
-A Filesystem Trustfall adapter
+A Filesystem Trustfall adapter.
+
+NOTE: This adapter is not maintained by the Trustfall maintainers.
 
 ## Spec
 

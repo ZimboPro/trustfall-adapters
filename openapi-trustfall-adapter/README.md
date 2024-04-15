@@ -2,6 +2,8 @@
 
 A OpenAPI Trustfall adapter for the v3.0.x spec.
 
+NOTE: This adapter is not maintained by the Trustfall maintainers.
+
 ## Spec
 
 ```graphql

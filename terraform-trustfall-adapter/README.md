@@ -2,6 +2,8 @@
 
 A Terraform Trustfall adapter.
 
+NOTE: This adapter is not maintained by the Trustfall maintainers.
+
 ## Spec
 
 ```graphql
