@@ -1,0 +1,106 @@
+schema {
+  query: RootSchemaQuery
+}
+directive @filter(
+  """
+  Name of the filter operation to perform.
+  """
+  op: String!
+  """
+  List of string operands for the operator.
+  """
+  value: [String!]
+) repeatable on FIELD | INLINE_FRAGMENT
+directive @tag(
+  """
+  Name to apply to the given property field.
+  """
+  name: String
+) on FIELD
+directive @output(
+  """
+  What to designate the output field generated from this property field.
+  """
+  name: String
+) on FIELD
+directive @optional on FIELD
+directive @recurse(
+  """
+  Recurse up to this many times on this edge. A depth of 1 produces the current
+  vertex and its immediate neighbors along the given edge.
+  """
+  depth: Int!
+) on FIELD
+directive @fold on FIELD
+directive @transform(
+  """
+  Name of the transformation operation to perform.
+  """
+  op: String!
+) on FIELD
+
+type RootSchemaQuery {
+  Modules: [Module!]!
+  ApiConfig: ApiConfig
+  Lambda: [Lambda!]
+  Module(name: String!, tag: String): [Module],
+  Terraform: [Terraform!]!
+}
+
+type Module {
+  source: String!
+  version: String!
+  variables: [Variable!]
+}
+
+type Variable {
+  name: String!
+  """
+  It will be the string implementation of the value.
+  """
+  value: String!
+}
+
+type Terraform {
+  required_version: String
+  backend: Backend
+  required_providers: [RequiredProvider!]
+}
+
+type Backend {
+  name: String!
+}
+
+type RequiredProvider {
+  name: String!
+  source: String!
+  version: String!
+}
+
+type ApiConfig {
+  source: String!
+  version: String!
+  template_file: String!
+  template_variables: [TemplateVariable!]!
+}
+
+type TemplateVariable {
+  name: String!
+  value: String!
+  lambda: Lambda
+}
+
+type Lambda {
+  name: String!
+  description: String!
+  handler: String!
+  permissions: [Permissions!]!
+}
+
+type Permissions {
+  statement_id: String!
+  principal: String!
+  source_arn: String!
+  http_method: String
+  http_path: String
+}
