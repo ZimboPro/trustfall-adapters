@@ -4,10 +4,10 @@ use openapiv3::{Operation, PathItem};
 use serde::{Deserialize, Serialize};
 use yaml_hash::YamlHash;
 
-pub(crate) fn merge(files: Vec<String>) -> String {
-    let hash = YamlHash::new();
-    for file in files {
-        let _ = hash.merge_file(&file);
+pub(crate) fn merge(file_contents: Vec<String>) -> String {
+    let mut hash = YamlHash::new();
+    for file in file_contents {
+        hash = hash.merge_str(&file).unwrap();
     }
 
     hash.to_string()
