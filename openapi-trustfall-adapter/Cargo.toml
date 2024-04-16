@@ -1,6 +1,6 @@
 [package]
 name = "openapi-trustfall-adapter"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 authors = ["Leslie de Jager"]
 # You can find the supported categories here https://crates.io/category_slugs

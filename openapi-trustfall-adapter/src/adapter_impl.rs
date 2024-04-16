@@ -36,7 +36,8 @@ impl OpenApiAdapter {
 
     /// Create a new OpenAPI adapter from a file or directory
     ///
-    /// Looks for yaml and yml files in the directory and merges them into a single OpenAPI object
+    /// If a directory, yaml and yml files in it and merges them into a single OpenAPI file
+    /// If a file, reads the file and parses it
     pub fn new(path: PathBuf) -> Self {
         let openapi = if path.is_dir() {
             let mut files = find_files(&path, "yaml".as_ref());
