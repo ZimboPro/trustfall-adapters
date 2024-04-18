@@ -12,7 +12,7 @@ use trustfall::{
     FieldValue, Schema,
 };
 
-use crate::utils::{find_files, open_file};
+use crate::{errors::OpenAPIAdapterErrors, utils::find_files};
 
 use super::{
     utils::{merge, Route},
@@ -34,39 +34,46 @@ impl OpenApiAdapter {
         SCHEMA.get_or_init(|| Schema::parse(Self::SCHEMA_TEXT).expect("not a valid schema"))
     }
 
-    /// Create a new OpenAPI adapter from a file or directory
-    ///
-    /// If a directory, yaml and yml files in it and merges them into a single OpenAPI file
-    /// If a file, reads the file and parses it
-    pub fn new(path: PathBuf) -> Self {
-        let openapi = if path.is_dir() {
-            let mut files = find_files(&path, "yaml".as_ref());
-            files.extend(find_files(&path, "yml".as_ref()));
-            let mut files_content = Vec::new();
-            for file in files {
-                files_content.push(open_file(file));
-            }
-            let merged_content = merge(files_content);
-            serde_yaml::from_str(&merged_content).unwrap()
-        } else if path.is_file() {
-            let file = std::fs::File::open(path).expect("failed to open file");
-            let reader = std::io::BufReader::new(file);
-            serde_yaml::from_reader(reader).expect("failed to parse OpenAPI file")
-        } else {
-            panic!("Path: {:?} is not a file or directory", path)
-        };
-
-        Self { openapi }
+    /// Create a new OpenAPI default adapter
+    pub fn new() -> Self {
+        Default::default()
     }
 
-    pub fn new_files(files: Vec<PathBuf>) -> Self {
-        let mut files_content = Vec::new();
-        for file in files {
-            files_content.push(open_file(file));
+    /// New instance with selected files to used
+    pub fn new_with_files(files: Vec<PathBuf>) -> Result<Self, OpenAPIAdapterErrors> {
+        let mut adapter = Self::default();
+        adapter.files(files)?;
+        Ok(adapter)
+    }
+
+    pub fn new_with_path(path: PathBuf) -> Result<Self, OpenAPIAdapterErrors> {
+        let mut adapter = Self::default();
+        adapter.set_path(path)?;
+        Ok(adapter)
+    }
+
+    /// Set the files that are to be used
+    pub fn files(&mut self, files: Vec<PathBuf>) -> Result<(), OpenAPIAdapterErrors> {
+        let merged_content = merge(files)?;
+        self.openapi = serde_yaml::from_str(&merged_content)
+            .map_err(OpenAPIAdapterErrors::FailedToSerializeToOpenAPI)?;
+        Ok(())
+    }
+
+    /// Sets the directory that files are to be found
+    pub fn set_path(&mut self, path: PathBuf) -> Result<(), OpenAPIAdapterErrors> {
+        if !path.exists() {
+            return Err(OpenAPIAdapterErrors::PathIsNotADirectory(path));
         }
-        let merged_content = merge(files_content);
-        let openapi: openapiv3::OpenAPI = serde_yaml::from_str(&merged_content).unwrap();
-        Self { openapi }
+        let mut files = find_files(&path, "yaml".as_ref());
+        files.extend(find_files(&path, "yml".as_ref()));
+        if files.is_empty() {
+            return Err(OpenAPIAdapterErrors::FilesNotFound(path));
+        }
+        let merged_content = merge(files)?;
+        self.openapi = serde_yaml::from_str(&merged_content)
+            .map_err(OpenAPIAdapterErrors::FailedToSerializeToOpenAPI)?;
+        Ok(())
     }
 
     fn info(&self) -> Vertex {

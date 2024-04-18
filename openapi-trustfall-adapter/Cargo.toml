@@ -1,6 +1,6 @@
 [package]
 name = "openapi-trustfall-adapter"
-version = "0.1.1"
+version = "0.2.0"
 edition = "2021"
 authors = ["Leslie de Jager"]
 # You can find the supported categories here https://crates.io/category_slugs
@@ -21,3 +21,4 @@ serde_json = { workspace = true }
 yaml-hash = "0.3.0"
 openapiv3 = "2.0.0"
 serde_yaml = "0.9.34"
+thiserror = { workspace = true }
