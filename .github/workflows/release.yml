@@ -8,6 +8,8 @@ on:
   push:
     branches:
       - master
+    paths:
+      - "openapi-trustfall-adapter/**"
 
 jobs:
   release-plz:
@@ -16,12 +18,39 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
-      - name: Run release-plz
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            openapi:
+            - "openapi-trustfall-adapter/**"
+            filesystem:
+            - "filesystem-trustfall-adapter/**"
+            terraform:
+            - "terraform-trustfall-adapter/**"
+      - name: Run OpenAPI release-plz
+        if: steps.filter.outputs.openapi == 'true'
         uses: MarcoIeni/release-plz-action@v0.5
+        with:
+          manifest_path: openapi-trustfall-adapter
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+      - name: Run Filesystem release-plz
+        if: steps.filter.outputs.filesystem == 'true'
+        uses: MarcoIeni/release-plz-action@v0.5
+        with:
+          manifest_path: filesystem-trustfall-adapter
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+      - name: Run Terraform release-plz
+        if: steps.filter.outputs.terraform == 'true'
+        uses: MarcoIeni/release-plz-action@v0.5
+        with:
+          manifest_path: terraform-trustfall-adapter
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
