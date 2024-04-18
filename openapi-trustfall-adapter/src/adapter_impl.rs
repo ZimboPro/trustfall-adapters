@@ -56,7 +56,7 @@ impl OpenApiAdapter {
     pub fn files(&mut self, files: Vec<PathBuf>) -> Result<(), OpenAPIAdapterErrors> {
         let merged_content = merge(files)?;
         self.openapi = serde_yaml::from_str(&merged_content)
-            .map_err(|e| OpenAPIAdapterErrors::FailedToSerializeToOpenAPI(e))?;
+            .map_err(OpenAPIAdapterErrors::FailedToSerializeToOpenAPI)?;
         Ok(())
     }
 
@@ -72,7 +72,7 @@ impl OpenApiAdapter {
         }
         let merged_content = merge(files)?;
         self.openapi = serde_yaml::from_str(&merged_content)
-            .map_err(|e| OpenAPIAdapterErrors::FailedToSerializeToOpenAPI(e))?;
+            .map_err(OpenAPIAdapterErrors::FailedToSerializeToOpenAPI)?;
         Ok(())
     }
 

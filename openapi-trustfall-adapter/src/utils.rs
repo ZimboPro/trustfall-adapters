@@ -135,8 +135,7 @@ pub(crate) fn find_files(path: &std::path::Path, extension: &OsStr) -> Vec<PathB
 
 /// Gets a file's contents
 pub(crate) fn open_file(filename: PathBuf) -> Result<String, OpenAPIAdapterErrors> {
-    let mut file =
-        std::fs::File::open(filename).map_err(|e| OpenAPIAdapterErrors::FailedToOpenFile(e))?;
+    let mut file = std::fs::File::open(filename).map_err(OpenAPIAdapterErrors::FailedToOpenFile)?;
     let mut contents = String::new();
     file.read_to_string(&mut contents)
         .expect("Couldn't read the contents of the file");
