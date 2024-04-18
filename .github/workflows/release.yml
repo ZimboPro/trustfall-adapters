@@ -34,7 +34,7 @@ jobs:
         if: steps.filter.outputs.openapi == 'true'
         uses: MarcoIeni/release-plz-action@v0.5
         with:
-          manifest_path: openapi-trustfall-adapter
+          manifest_path: openapi-trustfall-adapter/Cargo.toml
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
@@ -42,7 +42,7 @@ jobs:
         if: steps.filter.outputs.filesystem == 'true'
         uses: MarcoIeni/release-plz-action@v0.5
         with:
-          manifest_path: filesystem-trustfall-adapter
+          manifest_path: filesystem-trustfall-adapter/Cargo.toml
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
@@ -50,7 +50,7 @@ jobs:
         if: steps.filter.outputs.terraform == 'true'
         uses: MarcoIeni/release-plz-action@v0.5
         with:
-          manifest_path: terraform-trustfall-adapter
+          manifest_path: terraform-trustfall-adapter/Cargo.toml
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
