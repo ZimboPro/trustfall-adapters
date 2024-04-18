@@ -4,13 +4,21 @@ use openapiv3::{Operation, PathItem};
 use serde::{Deserialize, Serialize};
 use yaml_hash::YamlHash;
 
-pub(crate) fn merge(file_contents: Vec<String>) -> String {
+use crate::errors::OpenAPIAdapterErrors;
+
+pub(crate) fn merge(files: Vec<PathBuf>) -> Result<String, OpenAPIAdapterErrors> {
     let mut hash = YamlHash::new();
-    for file in file_contents {
-        hash = hash.merge_str(&file).unwrap();
+    for file in files {
+        if !(file.exists() && file.is_file()) {
+            return Err(OpenAPIAdapterErrors::PathDoesNotExist(file));
+        }
+        let contents = open_file(file)?;
+        hash = hash
+            .merge_str(&contents)
+            .map_err(|e| OpenAPIAdapterErrors::FailedToMerge(e.to_string()))?;
     }
 
-    hash.to_string()
+    Ok(hash.to_string())
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
@@ -126,10 +134,11 @@ pub(crate) fn find_files(path: &std::path::Path, extension: &OsStr) -> Vec<PathB
 }
 
 /// Gets a file's contents
-pub(crate) fn open_file(filename: PathBuf) -> String {
-    let mut file = std::fs::File::open(filename).expect("Couldn't find or open the file");
+pub(crate) fn open_file(filename: PathBuf) -> Result<String, OpenAPIAdapterErrors> {
+    let mut file =
+        std::fs::File::open(filename).map_err(|e| OpenAPIAdapterErrors::FailedToOpenFile(e))?;
     let mut contents = String::new();
     file.read_to_string(&mut contents)
         .expect("Couldn't read the contents of the file");
-    contents
+    Ok(contents)
 }
