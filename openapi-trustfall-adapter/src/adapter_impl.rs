@@ -30,6 +30,7 @@ pub struct OpenApiAdapter {
 impl OpenApiAdapter {
     pub const SCHEMA_TEXT: &'static str = include_str!("./schema.graphql");
 
+    /// Get the defined schema for the adapter
     pub fn schema() -> &'static Schema {
         SCHEMA.get_or_init(|| Schema::parse(Self::SCHEMA_TEXT).expect("not a valid schema"))
     }
