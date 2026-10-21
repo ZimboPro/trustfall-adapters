@@ -18,7 +18,7 @@ repository = "https://github.com/ZimboPro/trustfall-adapters.git"
 trustfall = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
-yaml-hash = "0.3.0"
-openapiv3 = "2.0.0"
-serde_yaml = "0.9.34"
+yaml-hash = { workspace = true }
+openapiv3 = { workspace = true }
+serde_yaml = { workspace = true }
 thiserror = { workspace = true }
