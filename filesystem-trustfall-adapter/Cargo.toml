@@ -17,4 +17,4 @@ repository = "https://github.com/ZimboPro/trustfall-adapters.git"
 trustfall = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
-sha256 = "1.5.0"
+sha256 = { workspace = true }
